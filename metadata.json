@@ -1,0 +1,6 @@
+{
+  "name": "أرض زيكولا 3 و 2 و 1 - بدون نت",
+  "description": "تطبيق لقراءة روايات سلسلة أرض زيكولا للكاتب عمرو عبد الحميد (أرض زيكولا، أماريتا، وادي الذئاب المنسية) بدون إنترنت.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
