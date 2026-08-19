@@ -18,6 +18,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 
+
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -92,6 +95,10 @@ fun ReaderScreen(
     var showControls by remember { mutableStateOf(true) }
     var showSettingsSheet by remember { mutableStateOf(false) }
     
+
+    val snackbarHostState = remember { SnackbarHostState() }
+val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle()
+    val bookmarkedOffset by viewModel.bookmarkedOffset.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     LaunchedEffect(initialScroll) {
@@ -471,6 +478,19 @@ fun ReaderScreen(
                         }
                     },
                     actions = {
+
+                        IconButton(onClick = { 
+                            viewModel.saveBookmark(listState.firstVisibleItemScrollOffset)
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("تم حفظ العلامة المرجعية")
+                            }
+                        }) {
+                            Icon(
+                                imageVector = if (bookmarkedChapter != -1) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = "علامة مرجعية",
+                                tint = currentTheme.text
+                            )
+                        }
                         IconButton(onClick = { isSearching = true }) {
                             Icon(
                                 imageVector = Icons.Filled.Search,
@@ -536,7 +556,15 @@ fun ReaderScreen(
                 )
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 64.dp)
+        )
     }
+
+
+
 
     if (showSettingsSheet) {
         ModalBottomSheet(
@@ -622,6 +650,40 @@ fun ReaderScreen(
                         }
                     }
                 }
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("العلامة المرجعية", style = MaterialTheme.typography.titleMedium)
+                    Button(
+                        onClick = {
+                            if (bookmarkedChapter == -1) {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("لا توجد علامة محفوظة")
+                                }
+                            } else {
+                                if (currentBlockIndex == bookmarkedChapter) {
+                                    coroutineScope.launch {
+                                        listState.scrollToItem(0, bookmarkedOffset)
+                                    }
+                                } else {
+                                    viewModel.jumpToBookmark(bookmarkedChapter, bookmarkedOffset)
+                                }
+                                showSettingsSheet = false
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text("الانتقال إلى العلامة المحفوظة")
+                    }
+                }
+
             }
         }
     }

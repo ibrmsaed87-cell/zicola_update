@@ -43,6 +43,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val _currentBook = MutableStateFlow<com.spinel.zicola.zicola.model.Book?>(null)
     val currentBook = _currentBook.asStateFlow()
 
+
+    private val _bookmarkedChapter = MutableStateFlow(-1)
+    val bookmarkedChapter = _bookmarkedChapter.asStateFlow()
+
+    private val _bookmarkedOffset = MutableStateFlow(-1)
+    val bookmarkedOffset = _bookmarkedOffset.asStateFlow()
     private val _nextBook = MutableStateFlow<com.spinel.zicola.zicola.model.Book?>(null)
     val nextBook = _nextBook.asStateFlow()
 
@@ -60,6 +66,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             else -> null
         }
         _nextBook.value = nextBookId?.let { repository.getBook(it) }
+
+        viewModelScope.launch {
+            _bookmarkedChapter.value = preferencesManager.getBookmarkChapter(bookId).first()
+            _bookmarkedOffset.value = preferencesManager.getBookmarkOffset(bookId).first()
+        }
+
         
         viewModelScope.launch {
             val blockIndex = if (requestedChapter >= 0) {
@@ -137,6 +149,26 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun updateLineSpacing(spacing: Float) {
         viewModelScope.launch { preferencesManager.saveLineSpacing(spacing) }
     }
+
+    fun saveBookmark(offset: Int) {
+        val bookId = currentBookId ?: return
+        val chapter = _currentBlockIndex.value
+        viewModelScope.launch {
+            preferencesManager.saveBookmark(bookId, chapter, offset)
+            _bookmarkedChapter.value = chapter
+            _bookmarkedOffset.value = offset
+        }
+    }
+
+
+    fun jumpToBookmark(chapter: Int, offset: Int) {
+        if (chapter < _totalBlocks.value && chapter >= 0) {
+            _currentBlockIndex.value = chapter
+            _initialScroll.value = Pair(chapter, offset)
+            currentBookId?.let { loadBlock(it, chapter) }
+        }
+    }
+
     fun updateTheme(themeName: String) {
         viewModelScope.launch { preferencesManager.saveTheme(themeName) }
     }

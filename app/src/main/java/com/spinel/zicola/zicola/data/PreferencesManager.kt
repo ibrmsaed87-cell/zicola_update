@@ -39,6 +39,17 @@ class PreferencesManager(private val context: Context) {
         }
     }
 
+
+    fun getBookmarkChapter(bookId: String): Flow<Int> = context.dataStore.data.map { it[intPreferencesKey("${bookId}_bookmark_chapter")] ?: -1 }
+    fun getBookmarkOffset(bookId: String): Flow<Int> = context.dataStore.data.map { it[intPreferencesKey("${bookId}_bookmark_offset")] ?: -1 }
+
+    suspend fun saveBookmark(bookId: String, chapterIndex: Int, offset: Int) {
+        context.dataStore.edit {
+            it[intPreferencesKey("${bookId}_bookmark_chapter")] = chapterIndex
+            it[intPreferencesKey("${bookId}_bookmark_offset")] = offset
+        }
+    }
+
     companion object {
         private val FONT_SIZE = intPreferencesKey("font_size")
         private val LINE_SPACING = floatPreferencesKey("line_spacing")
