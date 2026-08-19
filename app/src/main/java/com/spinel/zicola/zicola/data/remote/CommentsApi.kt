@@ -11,7 +11,8 @@ import retrofit2.http.Query
 interface CommentsApi {
     @GET("comments.php")
     suspend fun getComments(
-        @Query("book_id") bookId: String
+        @Query("book_id") bookId: String,
+        @Query("page") page: Int
     ): GetCommentsResponse
 
     @FormUrlEncoded

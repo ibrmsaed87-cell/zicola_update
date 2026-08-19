@@ -12,10 +12,21 @@ data class Comment(
     @Json(name = "created_at") val createdAt: String
 )
 
+
+@JsonClass(generateAdapter = true)
+data class Pagination(
+    @Json(name = "page") val page: Int,
+    @Json(name = "per_page") val perPage: Int,
+    @Json(name = "total") val total: Int,
+    @Json(name = "total_pages") val totalPages: Int,
+    @Json(name = "has_previous") val hasPrevious: Boolean,
+    @Json(name = "has_next") val hasNext: Boolean
+)
+
 @JsonClass(generateAdapter = true)
 data class GetCommentsResponse(
     @Json(name = "status") val status: String,
-    @Json(name = "count") val count: Int,
+    @Json(name = "pagination") val pagination: Pagination? = null,
     @Json(name = "comments") val comments: List<Comment>
 )
 

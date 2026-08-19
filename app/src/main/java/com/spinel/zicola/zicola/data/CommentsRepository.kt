@@ -10,10 +10,10 @@ import kotlinx.coroutines.withContext
 
 class CommentsRepository(private val api: CommentsApi = RetrofitClient.commentsApi) {
     
-    suspend fun getComments(bookId: String): Result<GetCommentsResponse> {
+    suspend fun getComments(bookId: String, page: Int): Result<GetCommentsResponse> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = api.getComments(bookId)
+                val response = api.getComments(bookId, page)
                 Result.success(response)
             } catch (e: CancellationException) {
                 throw e

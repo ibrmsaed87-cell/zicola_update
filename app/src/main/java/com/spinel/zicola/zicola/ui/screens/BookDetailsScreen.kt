@@ -206,19 +206,6 @@ val book = bookWithProgress.book
                 )
             }
 
-            item {
-                AddCommentSection(
-                    name = nameInput,
-                    onNameChange = { nameInput = it },
-                    comment = commentInput,
-                    onCommentChange = { commentInput = it },
-                    isSubmitting = commentsState.isSubmitting,
-                    onSubmit = {
-                        commentsViewModel.submitComment(book.id, nameInput, commentInput)
-                    }
-                )
-            }
-
 
             when {
                 commentsState.isLoading -> {
@@ -259,6 +246,51 @@ val book = bookWithProgress.book
                         )
                     }
                 }
+            }
+
+            if (commentsState.totalPages > 1 && !commentsState.isLoading) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = { commentsViewModel.previousPage(book.id) },
+                            enabled = commentsState.hasPrevious
+                        ) {
+                            Text("السابق")
+                        }
+                        
+                        Text(
+                            text = "صفحة ${commentsState.currentPage} من ${commentsState.totalPages}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        TextButton(
+                            onClick = { commentsViewModel.nextPage(book.id) },
+                            enabled = commentsState.hasNext
+                        ) {
+                            Text("التالي")
+                        }
+                    }
+                }
+            }
+
+            item {
+                AddCommentSection(
+                    name = nameInput,
+                    onNameChange = { nameInput = it },
+                    comment = commentInput,
+                    onCommentChange = { commentInput = it },
+                    isSubmitting = commentsState.isSubmitting,
+                    onSubmit = {
+                        commentsViewModel.submitComment(book.id, nameInput, commentInput)
+                    }
+                )
             }
         }
     }
@@ -384,6 +416,7 @@ fun AddCommentSection(
                     Text("إرسال التعليق")
                 }
             }
+
         }
     }
 }

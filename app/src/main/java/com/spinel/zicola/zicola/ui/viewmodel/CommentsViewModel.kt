@@ -18,7 +18,11 @@ data class CommentsUiState(
     val loadError: String? = null,
     val isSubmitting: Boolean = false,
     val submitSuccess: Boolean = false,
-    val submitError: String? = null
+    val submitError: String? = null,
+    val currentPage: Int = 1,
+    val totalPages: Int = 1,
+    val hasPrevious: Boolean = false,
+    val hasNext: Boolean = false
 )
 
 class CommentsViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,18 +32,23 @@ class CommentsViewModel(application: Application) : AndroidViewModel(application
     private val _uiState = MutableStateFlow(CommentsUiState())
     val uiState: StateFlow<CommentsUiState> = _uiState.asStateFlow()
 
-    fun loadComments(bookId: String) {
+    fun loadComments(bookId: String, page: Int = 1) {
+        if (_uiState.value.isLoading) return
         _uiState.update { it.copy(isLoading = true, loadError = null) }
         
         viewModelScope.launch {
-            val result = repository.getComments(bookId)
+            val result = repository.getComments(bookId, page)
             result.onSuccess { response ->
                 if (response.status == "success") {
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
                             comments = response.comments,
-                            loadError = null
+                            loadError = null,
+                            currentPage = response.pagination?.page ?: 1,
+                            totalPages = response.pagination?.totalPages ?: 1,
+                            hasPrevious = response.pagination?.hasPrevious ?: false,
+                            hasNext = response.pagination?.hasNext ?: false
                         ) 
                     }
                 } else {
@@ -58,6 +67,20 @@ class CommentsViewModel(application: Application) : AndroidViewModel(application
                     ) 
                 }
             }
+        }
+    }
+
+    fun nextPage(bookId: String) {
+        val state = _uiState.value
+        if (state.hasNext && !state.isLoading && state.currentPage < state.totalPages) {
+            loadComments(bookId, state.currentPage + 1)
+        }
+    }
+
+    fun previousPage(bookId: String) {
+        val state = _uiState.value
+        if (state.hasPrevious && !state.isLoading && state.currentPage > 1) {
+            loadComments(bookId, state.currentPage - 1)
         }
     }
 
