@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
+import java.util.UUID
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "zicola_settings")
 
@@ -50,9 +52,22 @@ class PreferencesManager(private val context: Context) {
         }
     }
 
+    
+    suspend fun getOrCreateDeviceId(): String {
+        val preferences = context.dataStore.data.first()
+        val existingId = preferences[DEVICE_ID]
+        if (existingId != null) {
+            return existingId
+        }
+        val newId = UUID.randomUUID().toString()
+        context.dataStore.edit { it[DEVICE_ID] = newId }
+        return newId
+    }
+
     companion object {
         private val FONT_SIZE = intPreferencesKey("font_size")
         private val LINE_SPACING = floatPreferencesKey("line_spacing")
         private val THEME = stringPreferencesKey("theme")
+        private val DEVICE_ID = stringPreferencesKey("device_id")
     }
 }
