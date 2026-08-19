@@ -16,3 +16,7 @@
 local.properties
 .env
 debug.keystore
+
+# Google Play Upload Key - NEVER COMMIT
+zicola-upload-key.jks
+upload_certificate.pem

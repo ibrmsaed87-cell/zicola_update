@@ -3,12 +3,18 @@ package com.spinel.zicola.zicola.ui.screens
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
+import com.google.firebase.messaging.FirebaseMessaging
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -30,6 +36,7 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var fcmTokenDisplay by remember { mutableStateOf<String?>(null) }
     val appTheme by preferencesManager.appThemeFlow.collectAsState(initial = "SYSTEM")
 
     var versionName = ""
@@ -232,6 +239,57 @@ fun SettingsScreen(
                     }
                 }
             }
+
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "FCM Token - اختبار",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
+                )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column {
+                        SettingsItem(
+                            title = "إظهار FCM Token",
+                            onClick = {
+                                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                    if (!task.isSuccessful) {
+                                        val ex = task.exception
+                                        val errorMsg = "Error: ${ex?.javaClass?.name}\nMsg: ${ex?.message}"
+                                        fcmTokenDisplay = errorMsg
+                                        return@addOnCompleteListener
+                                    }
+                                    fcmTokenDisplay = task.result
+                                }
+                            }
+                        )
+                        
+                        fcmTokenDisplay?.let { token ->
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            SelectionContainer {
+                                Text(
+                                    text = token,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
