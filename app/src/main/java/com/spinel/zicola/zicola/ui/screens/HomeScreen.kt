@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +25,8 @@ import com.spinel.zicola.zicola.model.BookWithProgress
 @Composable
 fun HomeScreen(
     booksWithProgress: List<BookWithProgress>,
-    onBookClick: (String) -> Unit
+    onBookClick: (String) -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     if (booksWithProgress.isEmpty()) return
 
@@ -32,7 +35,24 @@ fun HomeScreen(
     val wadi = booksWithProgress.find { it.book.id == "wadi" }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            @OptIn(ExperimentalMaterial3Api::class)
+            TopAppBar(
+                title = { Text("أرض زيكولا") },
+                actions = {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "الإعدادات"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

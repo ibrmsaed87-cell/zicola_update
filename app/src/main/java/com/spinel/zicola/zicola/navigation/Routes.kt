@@ -2,6 +2,7 @@ package com.spinel.zicola.zicola.navigation
 
 sealed class Route(val route: String) {
     object Home : Route("home")
+    object Settings : Route("settings")
     object BookDetails : Route("book_details/{bookId}") {
         fun createRoute(bookId: String) = "book_details/$bookId"
     }

@@ -13,6 +13,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.spinel.zicola.zicola.data.PreferencesManager
+import com.spinel.zicola.zicola.ui.screens.SettingsScreen
 import com.spinel.zicola.zicola.navigation.Route
 import com.spinel.zicola.zicola.ui.screens.BookDetailsScreen
 import com.spinel.zicola.zicola.ui.screens.HomeScreen
@@ -27,16 +30,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val prefs = PreferencesManager(this)
         setContent {
-            ZicolaTheme {
-                ZicolaApp()
+            val appTheme by prefs.appThemeFlow.collectAsState(initial = "SYSTEM")
+            val darkTheme = when (appTheme) {
+                "DARK" -> true
+                "LIGHT" -> false
+                else -> isSystemInDarkTheme()
+            }
+            ZicolaTheme(darkTheme = darkTheme) {
+                ZicolaApp(prefs)
             }
         }
     }
 }
 
 @Composable
-fun ZicolaApp() {
+fun ZicolaApp(preferencesManager: PreferencesManager) {
     val navController = rememberNavController()
     val homeViewModel: HomeViewModel = viewModel()
     val readerViewModel: ReaderViewModel = viewModel()
@@ -45,10 +55,18 @@ fun ZicolaApp() {
         navController = navController,
         startDestination = Route.Home.route
     ) {
+composable(Route.Settings.route) {
+            SettingsScreen(
+                preferencesManager = preferencesManager,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
         composable(Route.Home.route) {
             val books by homeViewModel.booksWithProgress.collectAsState()
             HomeScreen(
                 booksWithProgress = books,
+                onSettingsClick = { navController.navigate(Route.Settings.route) },
                 onBookClick = { bookId ->
                     navController.navigate(Route.BookDetails.createRoute(bookId))
                 }

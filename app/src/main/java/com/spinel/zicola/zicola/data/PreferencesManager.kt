@@ -16,6 +16,11 @@ class PreferencesManager(private val context: Context) {
     val fontSizeFlow: Flow<Int> = context.dataStore.data.map { it[FONT_SIZE] ?: 20 }
     val lineSpacingFlow: Flow<Float> = context.dataStore.data.map { it[LINE_SPACING] ?: 1.8f }
     val themeFlow: Flow<String> = context.dataStore.data.map { it[THEME] ?: "SEPIA" }
+    val appThemeFlow: Flow<String> = context.dataStore.data.map { it[APP_THEME] ?: "SYSTEM" }
+
+    suspend fun saveAppTheme(theme: String) {
+        context.dataStore.edit { it[APP_THEME] = theme }
+    }
 
     suspend fun saveFontSize(size: Int) {
         context.dataStore.edit { it[FONT_SIZE] = size }
@@ -68,6 +73,7 @@ class PreferencesManager(private val context: Context) {
         private val FONT_SIZE = intPreferencesKey("font_size")
         private val LINE_SPACING = floatPreferencesKey("line_spacing")
         private val THEME = stringPreferencesKey("theme")
+        private val APP_THEME = stringPreferencesKey("app_theme")
         private val DEVICE_ID = stringPreferencesKey("device_id")
     }
 }
