@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.spinel.zicola.zicola.ads.BannerAdView
 import coil.compose.AsyncImage
 import com.spinel.zicola.zicola.model.Book
 import com.spinel.zicola.zicola.model.BookWithProgress
@@ -94,6 +95,14 @@ fun HomeScreen(
                     }
                 }
             }
+            
+            item {
+                com.spinel.zicola.zicola.ads.ComposeNativeAdView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                )
+            }
 
             item {
                 Text(
@@ -108,6 +117,10 @@ fun HomeScreen(
                         onClick = { onBookClick(wadi.book.id) }
                     )
                 }
+            }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                BannerAdView()
             }
         }
     }

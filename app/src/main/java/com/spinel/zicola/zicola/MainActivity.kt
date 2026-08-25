@@ -1,5 +1,6 @@
 package com.spinel.zicola.zicola
 
+import androidx.compose.ui.platform.LocalContext
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -56,10 +57,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    companion object {
+        private var isMobileAdsInitializeCalled = false
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         askNotificationPermission()
+        
+        com.spinel.zicola.zicola.ads.ConsentManager.init(this) {
+            if (!isMobileAdsInitializeCalled) {
+                isMobileAdsInitializeCalled = true
+                com.google.android.gms.ads.MobileAds.initialize(this) {}
+                com.spinel.zicola.zicola.ads.AdManager.init(this)
+                (application as ZicolaApplication).appOpenAdManager.loadAd()
+            }
+        }
+
         enableEdgeToEdge()
         val prefs = PreferencesManager(this)
         setContent {
@@ -109,6 +124,7 @@ composable(Route.Settings.route) {
             arguments = listOf(navArgument("bookId") { type = NavType.StringType })
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: return@composable
+            val activityContext = androidx.activity.compose.LocalActivity.current!!
             val books by homeViewModel.booksWithProgress.collectAsState()
             val bookWithProgress = books.find { it.book.id == bookId }
             
@@ -131,6 +147,7 @@ composable(Route.Settings.route) {
             arguments = listOf(navArgument("bookId") { type = NavType.StringType })
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getString("bookId") ?: return@composable
+            val activityContext = androidx.activity.compose.LocalActivity.current!!
             val books by homeViewModel.booksWithProgress.collectAsState()
             val bookWithProgress = books.find { it.book.id == bookId }
             
@@ -139,7 +156,9 @@ composable(Route.Settings.route) {
                     bookWithProgress = bookWithProgress,
                     onBackClick = { navController.popBackStack() },
                     onChapterClick = { chapterIndex ->
-                        navController.navigate(Route.Reader.createRoute(bookId, chapterIndex))
+                        com.spinel.zicola.zicola.ads.AdManager.showInterstitialAd(activityContext) {
+                            navController.navigate(Route.Reader.createRoute(bookId, chapterIndex))
+                        }
                     }
                 )
             }

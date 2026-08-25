@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.spinel.zicola.zicola.ads.BannerAdView
 import coil.compose.AsyncImage
 import com.spinel.zicola.zicola.model.Book
 import com.spinel.zicola.zicola.model.BookWithProgress
@@ -291,6 +292,9 @@ val book = bookWithProgress.book
                         commentsViewModel.submitComment(book.id, nameInput, commentInput)
                     }
                 )
+            }
+            item {
+                BannerAdView(modifier = Modifier.padding(vertical = 16.dp))
             }
         }
     }

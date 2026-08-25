@@ -59,6 +59,7 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 
 enum class ReaderTheme(val background: Color, val text: Color, val label: String) {
+
     LIGHT(OffWhite, Charcoal, "فاتح"),
     SEPIA(SepiaBackground, SepiaText, "دافئ"),
     DARK(DarkBackground, DarkCharcoal, "داكن")
@@ -70,12 +71,16 @@ fun ReaderScreen(
     bookId: String,
     bookTitle: String,
     chapterIndex: Int,
-    viewModel: ReaderViewModel,
+    viewModel: com.spinel.zicola.zicola.ui.viewmodel.ReaderViewModel,
     onBackClick: () -> Unit,
     onChaptersClick: () -> Unit,
     onNextBookClick: (String) -> Unit
 ) {
+    val activityContext = androidx.compose.ui.platform.LocalContext.current
+    val activity = androidx.activity.compose.LocalActivity.current!!
+
     LaunchedEffect(bookId, chapterIndex) {
+
         viewModel.initBook(bookId, chapterIndex)
     }
 
@@ -102,14 +107,17 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
     val listState = rememberLazyListState()
 
     LaunchedEffect(initialScroll) {
+
         initialScroll?.let { (index, offset) ->
             if (index == currentBlockIndex) {
+
                 listState.scrollToItem(0, offset)
             }
         }
     }
 
     LaunchedEffect(listState) {
+
         snapshotFlow { 
             listState.firstVisibleItemScrollOffset 
         }
@@ -132,6 +140,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
     val searchFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(currentBlockIndex, bookId) {
+
         isSearching = false
         searchQuery = ""
         searchResults = emptyList()
@@ -139,11 +148,14 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
     }
 
     LaunchedEffect(searchQuery, currentBlockIndex) {
+
         if (searchQuery.isNotBlank()) {
+
             val text = blocks[currentBlockIndex] ?: ""
             val matches = mutableListOf<Int>()
             var index = text.indexOf(searchQuery, ignoreCase = true)
             while (index >= 0) {
+
                 matches.add(index)
                 index = text.indexOf(searchQuery, index + 1, ignoreCase = true)
             }
@@ -156,7 +168,9 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
     }
 
     LaunchedEffect(currentResultIndex) {
+
         if (currentResultIndex >= 0 && currentResultIndex < searchResults.size && textLayoutResult != null) {
+
             val matchIndex = searchResults[currentResultIndex]
             val line = textLayoutResult!!.getLineForOffset(matchIndex)
             val yPos = textLayoutResult!!.getLineTop(line)
@@ -173,10 +187,12 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
             val layoutInfo = listState.layoutInfo
             val visibleHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
             if (textItemSize <= visibleHeight || visibleHeight <= 0) {
+
                 1f
             } else {
                 val maxScroll = (textItemSize - visibleHeight).toFloat()
                 val currentScroll = if (listState.firstVisibleItemIndex == 0) {
+
                     listState.firstVisibleItemScrollOffset.toFloat()
                 } else {
                     maxScroll
@@ -187,17 +203,22 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
     }
 
     LaunchedEffect(chapterProgress) {
+
         if (!isDraggingSlider) {
+
             sliderValue = chapterProgress
         }
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+
         Box(modifier = Modifier.fillMaxSize()) {
+
             Surface(
             modifier = Modifier.fillMaxSize(),
             color = currentTheme.background
         ) {
+
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -206,10 +227,12 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
+
                         showControls = !showControls
                     },
                 contentPadding = PaddingValues(top = 80.dp, bottom = 64.dp, start = 24.dp, end = 24.dp)
             ) {
+
                 item {
                     val content = blocks[currentBlockIndex]
                     val isError = errorBlocks.contains(currentBlockIndex)
@@ -222,8 +245,11 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                 textItemSize = coordinates.size.height
                             }
                     ) {
+
                         if (content != null) {
+
                             val annotatedContent = remember(content, searchQuery, searchResults, currentResultIndex, currentTheme) {
+
                                 if (searchQuery.isBlank() || searchResults.isEmpty()) return@remember AnnotatedString(content)
                                 
                                 buildAnnotatedString {
@@ -252,13 +278,16 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                 }
                             )
                         } else if (isError) {
+
                             Column(
                                 modifier = Modifier.fillMaxWidth().padding(32.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+
                                 Text("تعذر تحميل هذا الجزء", color = currentTheme.text)
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Button(onClick = { viewModel.loadBlock(bookId, currentBlockIndex) }) {
+
                                     Text("إعادة المحاولة")
                                 }
                             }
@@ -267,6 +296,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                 modifier = Modifier.fillMaxWidth().height(100.dp),
                                 contentAlignment = Alignment.Center
                             ) {
+
                                 CircularProgressIndicator(color = currentTheme.text.copy(alpha = 0.5f))
                             }
                         }
@@ -275,15 +305,23 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
 
                 item {
                     if (blocks[currentBlockIndex] != null) {
+
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 40.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+
                             if (currentBlockIndex < totalBlocks - 1) {
+
                                 Button(
-                                    onClick = { viewModel.goToNextChapter() },
+                                    onClick = { 
+                                        com.spinel.zicola.zicola.ads.AdManager.showInterstitialAd(activity) {
+
+                                            viewModel.goToNextChapter()
+                                        }
+                                    },
                                     modifier = Modifier
                                         .fillMaxWidth(0.8f)
                                         .height(56.dp),
@@ -293,6 +331,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                         contentColor = currentTheme.text
                                     )
                                 ) {
+
                                     Text("الفصل التالي", style = MaterialTheme.typography.titleMedium)
                                 }
                             } else {
@@ -306,6 +345,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                 val nextBook = viewModel.nextBook.collectAsStateWithLifecycle().value
                                 
                                 if (nextBook != null) {
+
                                     Card(
                                         modifier = Modifier
                                             .fillMaxWidth(0.9f)
@@ -316,12 +356,14 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                         ),
                                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                                     ) {
+
                                         Column(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(24.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
+
                                             AsyncImage(
                                                 model = nextBook.coverAssetPath,
                                                 contentDescription = nextBook.title,
@@ -349,6 +391,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                                     contentColor = MaterialTheme.colorScheme.onPrimary
                                                 )
                                             ) {
+
                                                 Text("انتقل للجزء التالي", style = MaterialTheme.typography.titleMedium)
                                             }
                                         }
@@ -367,6 +410,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                         contentColor = currentTheme.text
                                     )
                                 ) {
+
                                     Text("العودة إلى الفصول", style = MaterialTheme.typography.titleMedium)
                                 }
                             }
@@ -382,8 +426,10 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
             exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
             modifier = Modifier.align(Alignment.TopCenter)
         ) {
+
             val chapterTitle = currentBook?.chapters?.getOrNull(currentBlockIndex)?.title
             if (isSearching) {
+
                 TopAppBar(
                     title = {
                         TextField(
@@ -403,6 +449,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                             singleLine = true
                         )
                         LaunchedEffect(Unit) {
+
                             searchFocusRequester.requestFocus()
                         }
                     },
@@ -411,6 +458,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                             isSearching = false
                             searchQuery = ""
                         }) {
+
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "إغلاق البحث",
@@ -420,7 +468,9 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     },
                     actions = {
                         if (searchQuery.isNotBlank()) {
+
                             if (searchResults.isEmpty()) {
+
                                 Text("لا توجد نتائج", color = currentTheme.text.copy(alpha = 0.7f), modifier = Modifier.padding(end = 8.dp))
                             } else {
                                 Text(
@@ -430,11 +480,13 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                 IconButton(onClick = {
                                     if (currentResultIndex > 0) currentResultIndex-- else currentResultIndex = searchResults.size - 1
                                 }) {
+
                                     Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "السابق", tint = currentTheme.text)
                                 }
                                 IconButton(onClick = {
                                     if (currentResultIndex < searchResults.size - 1) currentResultIndex++ else currentResultIndex = 0
                                 }) {
+
                                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "التالي", tint = currentTheme.text)
                                 }
                             }
@@ -451,6 +503,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.Start
                         ) {
+
                             Text(
                                 text = bookTitle, 
                                 color = currentTheme.text, 
@@ -470,6 +523,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
+
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "عودة",
@@ -485,6 +539,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                                 snackbarHostState.showSnackbar("تم حفظ العلامة المرجعية")
                             }
                         }) {
+
                             Icon(
                                 imageVector = if (bookmarkedChapter != -1) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                                 contentDescription = "علامة مرجعية",
@@ -492,6 +547,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                             )
                         }
                         IconButton(onClick = { isSearching = true }) {
+
                             Icon(
                                 imageVector = Icons.Filled.Search,
                                 contentDescription = "بحث",
@@ -499,6 +555,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                             )
                         }
                         IconButton(onClick = { showSettingsSheet = true }) {
+
                             Icon(
                                 imageVector = Icons.Filled.Settings,
                                 contentDescription = "إعدادات القراءة",
@@ -519,10 +576,12 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
             exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
+
             Surface(
                 color = currentTheme.background.copy(alpha = 0.95f),
                 modifier = Modifier.fillMaxWidth()
             ) {
+
                 Slider(
                     value = sliderValue,
                     onValueChange = { newValue ->
@@ -532,6 +591,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                         val layoutInfo = listState.layoutInfo
                         val visibleHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
                         if (textItemSize > visibleHeight && visibleHeight > 0) {
+
                             val maxScroll = textItemSize - visibleHeight
                             val targetScroll = (newValue * maxScroll).toInt()
                             coroutineScope.launch {
@@ -542,6 +602,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     onValueChangeFinished = {
                         isDraggingSlider = false
                         if (listState.firstVisibleItemIndex == 0) {
+
                             viewModel.saveProgress(currentBlockIndex, listState.firstVisibleItemScrollOffset)
                         }
                     },
@@ -567,11 +628,13 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
 
 
     if (showSettingsSheet) {
+
         ModalBottomSheet(
             onDismissRequest = { showSettingsSheet = false },
             containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -579,6 +642,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     .padding(bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+
                 Text(
                     text = "إعدادات القراءة",
                     style = MaterialTheme.typography.titleLarge,
@@ -590,16 +654,20 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
                     Text("حجم الخط", style = MaterialTheme.typography.titleMedium)
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+
                         OutlinedButton(onClick = { if (fontSize > 14) viewModel.updateFontSize(fontSize - 2) }) {
+
                             Text("A-", fontSize = 16.sp)
                         }
                         Text("$fontSize", style = MaterialTheme.typography.bodyLarge)
                         OutlinedButton(onClick = { if (fontSize < 32) viewModel.updateFontSize(fontSize + 2) }) {
+
                             Text("A+", fontSize = 16.sp)
                         }
                     }
@@ -610,8 +678,10 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
                     Text("تباعد الأسطر", style = MaterialTheme.typography.titleMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
                         FilterChip(
                             selected = lineSpacing == 1.4f,
                             onClick = { viewModel.updateLineSpacing(1.4f) },
@@ -635,8 +705,10 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
                     Text("المظهر", style = MaterialTheme.typography.titleMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
                         ReaderTheme.values().forEach { themeOpt ->
                             FilterChip(
                                 selected = currentTheme == themeOpt,
@@ -657,15 +729,18 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
                     Text("العلامة المرجعية", style = MaterialTheme.typography.titleMedium)
                     Button(
                         onClick = {
                             if (bookmarkedChapter == -1) {
+
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("لا توجد علامة محفوظة")
                                 }
                             } else {
                                 if (currentBlockIndex == bookmarkedChapter) {
+
                                     coroutineScope.launch {
                                         listState.scrollToItem(0, bookmarkedOffset)
                                     }
@@ -680,6 +755,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
+
                         Text("الانتقال إلى العلامة المحفوظة")
                     }
                 }

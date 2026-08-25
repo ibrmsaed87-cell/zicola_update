@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.spinel.zicola.zicola.ads.BannerAdView
 import com.spinel.zicola.zicola.model.BookWithProgress
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,6 +137,13 @@ fun ChaptersScreen(
                                 )
                             }
                         }
+                    }
+                    
+                    if ((index + 1) % 7 == 0 && (index + 1) < book.totalBlocks) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        com.spinel.zicola.zicola.ads.ComposeNativeAdView(
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
