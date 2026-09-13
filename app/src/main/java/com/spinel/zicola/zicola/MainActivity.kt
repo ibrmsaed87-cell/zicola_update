@@ -61,22 +61,11 @@ class MainActivity : ComponentActivity() {
         private var isMobileAdsInitializeCalled = false
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        askNotificationPermission()
-        
-        com.spinel.zicola.zicola.ads.ConsentManager.init(this) {
-            if (!isMobileAdsInitializeCalled) {
-                isMobileAdsInitializeCalled = true
-                com.google.android.gms.ads.MobileAds.initialize(this) {}
-                com.spinel.zicola.zicola.ads.AdManager.init(this)
-                (application as ZicolaApplication).appOpenAdManager.loadAd()
-            }
-        }
-
         enableEdgeToEdge()
         val prefs = PreferencesManager(this)
+
         setContent {
             val appTheme by prefs.appThemeFlow.collectAsState(initial = "SYSTEM")
             val darkTheme = when (appTheme) {
@@ -84,6 +73,20 @@ class MainActivity : ComponentActivity() {
                 "LIGHT" -> false
                 else -> isSystemInDarkTheme()
             }
+
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                askNotificationPermission()
+                
+                com.spinel.zicola.zicola.ads.ConsentManager.init(this@MainActivity) {
+                    if (!isMobileAdsInitializeCalled) {
+                        isMobileAdsInitializeCalled = true
+                        com.google.android.gms.ads.MobileAds.initialize(this@MainActivity) {}
+                        com.spinel.zicola.zicola.ads.AdManager.init(this@MainActivity)
+                        (application as ZicolaApplication).appOpenAdManager.loadAd()
+                    }
+                }
+            }
+
             ZicolaTheme(darkTheme = darkTheme) {
                 ZicolaApp(prefs)
             }
