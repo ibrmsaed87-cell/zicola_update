@@ -1,4 +1,4 @@
-name: Build Zicola Debug APK
+name: Build Zicola Signed APK
 
 on:
   workflow_dispatch:
@@ -23,25 +23,23 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Create debug keystore
+      - name: Restore original keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          keytool -genkeypair -v \
-            -keystore debug.keystore \
-            -storepass android \
-            -alias androiddebugkey \
-            -keypass android \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/zicola-upload-key-v2.jks"
 
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace
+      - name: Build signed release APK
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/zicola-upload-key-v2.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle :app:assembleRelease --stacktrace
 
-      - name: Upload debug APK
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: zicola-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: zicola-signed-apk
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 7
