@@ -1,4 +1,4 @@
-name: Build Zicola Signed APK
+name: Build Zicola Play AAB
 
 on:
   workflow_dispatch:
@@ -35,17 +35,17 @@ jobs:
         run: |
           printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
 
-      - name: Build signed release APK
+      - name: Build signed release AAB
         env:
           KEYSTORE_PATH: ${{ runner.temp }}/zicola-upload-key-v2.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: gradle :app:assembleRelease --stacktrace
+        run: gradle :app:bundleRelease --stacktrace
 
-      - name: Upload signed APK
+      - name: Upload signed AAB
         uses: actions/upload-artifact@v4
         with:
-          name: zicola-signed-apk
-          path: app/build/outputs/apk/release/*.apk
+          name: zicola-play-aab
+          path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 7
