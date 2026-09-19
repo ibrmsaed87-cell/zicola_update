@@ -47,20 +47,13 @@ jobs:
           AAB=$(find app/build/outputs/bundle/release -name '*.aab' -print -quit)
           test -n "$AAB"
           echo "Checking native libraries in $AAB"
-          unzip -l "$AAB" | awk '{print $4}' | grep -E '\\.so
-        uses: actions/upload-artifact@v4
-        with:
-          name: zicola-play-aab
-          path: app/build/outputs/bundle/release/*.aab
-          if-no-files-found: error
-          retention-days: 7
- > "$RUNNER_TEMP/native-libs.txt" || true
+          unzip -l "$AAB" | awk '{print $4}' | grep -E '\\.so$' > "$RUNNER_TEMP/native-libs.txt" || true
           if [ -s "$RUNNER_TEMP/native-libs.txt" ]; then
             echo "Native libraries found:"
             cat "$RUNNER_TEMP/native-libs.txt"
-            echo "AAB uses modern AGP packaging; Google Play will perform final 16 KB compatibility validation on upload."
+            echo "Modern AGP packaging is enabled; Google Play will perform final 16 KB validation on upload."
           else
-            echo "PASS: No native .so libraries found in the AAB. No native ELF page-alignment issue applies."
+            echo "PASS: No native .so libraries found. No native ELF page-alignment issue applies."
           fi
 
       - name: Upload signed AAB
