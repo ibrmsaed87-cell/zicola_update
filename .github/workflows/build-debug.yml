@@ -29,6 +29,12 @@ jobs:
         run: |
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/zicola-upload-key-v2.jks"
 
+      - name: Restore Firebase configuration
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          printf '%s' "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+
       - name: Build signed release APK
         env:
           KEYSTORE_PATH: ${{ runner.temp }}/zicola-upload-key-v2.jks
