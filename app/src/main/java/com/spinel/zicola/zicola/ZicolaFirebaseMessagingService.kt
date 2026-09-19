@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -25,11 +26,12 @@ class ZicolaFirebaseMessagingService : FirebaseMessagingService() {
 
         val title = remoteMessage.notification?.title ?: "إشعار جديد"
         val body = remoteMessage.notification?.body ?: "لديك تحديث جديد في التطبيق"
+        val url = remoteMessage.data["url"]
 
-        showNotification(title, body)
+        showNotification(title, body, url)
     }
 
-    private fun showNotification(title: String, body: String) {
+    private fun showNotification(title: String, body: String, url: String?) {
         val channelId = "zicola_updates"
         val channelName = "التحديثات والإشعارات"
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -43,13 +45,17 @@ class ZicolaFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        val intent = if (!url.isNullOrBlank()) {
+            Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        } else {
+            Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
         }
-        
+
         val pendingIntent = PendingIntent.getActivity(
             this,
-            0,
+            Random.nextInt(),
             intent,
             PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
