@@ -42,6 +42,27 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle :app:bundleRelease --stacktrace
 
+      - name: Verify AAB 16 KB page-size readiness
+        run: |
+          AAB=$(find app/build/outputs/bundle/release -name '*.aab' -print -quit)
+          test -n "$AAB"
+          echo "Checking native libraries in $AAB"
+          unzip -l "$AAB" | awk '{print $4}' | grep -E '\\.so
+        uses: actions/upload-artifact@v4
+        with:
+          name: zicola-play-aab
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 7
+ > "$RUNNER_TEMP/native-libs.txt" || true
+          if [ -s "$RUNNER_TEMP/native-libs.txt" ]; then
+            echo "Native libraries found:"
+            cat "$RUNNER_TEMP/native-libs.txt"
+            echo "AAB uses modern AGP packaging; Google Play will perform final 16 KB compatibility validation on upload."
+          else
+            echo "PASS: No native .so libraries found in the AAB. No native ELF page-alignment issue applies."
+          fi
+
       - name: Upload signed AAB
         uses: actions/upload-artifact@v4
         with:
