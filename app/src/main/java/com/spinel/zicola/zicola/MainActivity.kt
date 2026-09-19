@@ -3,6 +3,8 @@ package com.spinel.zicola.zicola
 import androidx.compose.ui.platform.LocalContext
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -57,12 +59,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun handleNotificationUrl(sourceIntent: Intent?) {
+        val url = sourceIntent?.getStringExtra("url")
+        if (!url.isNullOrBlank()) {
+            sourceIntent.removeExtra("url")
+            runCatching {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleNotificationUrl(intent)
+    }
+
     companion object {
         private var isMobileAdsInitializeCalled = false
     }
 
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleNotificationUrl(intent)
         enableEdgeToEdge()
         val prefs = PreferencesManager(this)
 
