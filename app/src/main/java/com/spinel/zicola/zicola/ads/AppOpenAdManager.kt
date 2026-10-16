@@ -30,7 +30,7 @@ class AppOpenAdManager(private val application: Application) : Application.Activ
 
     fun loadAd() {
         if (!com.spinel.zicola.zicola.ads.ConsentManager.canRequestAds.value) return
-        if (isLoadingAd || isAdAvailable()) {
+        if (AdManager.isAdsDisabled() || isLoadingAd || isAdAvailable()) {
             return
         }
 
@@ -65,9 +65,8 @@ class AppOpenAdManager(private val application: Application) : Application.Activ
     }
 
     private fun showAdIfAvailable() {
-        if (!com.spinel.zicola.zicola.ads.ConsentManager.canRequestAds.value) return
-        if (!isShowingAd && isAdAvailable()) {
-            if (AdManager.isAdsDisabled()) return // Don't show if ads are disabled via Reward
+        if (!com.spinel.zicola.zicola.ads.ConsentManager.canRequestAds.value || AdManager.isAdsDisabled() || isShowingAd) return
+        if (isAdAvailable()) {
             
             appOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
@@ -110,6 +109,6 @@ class AppOpenAdManager(private val application: Application) : Application.Activ
     override fun onActivityStopped(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
     override fun onActivityDestroyed(activity: Activity) {
-        currentActivity = null
+        if (currentActivity === activity) currentActivity = null
     }
 }
