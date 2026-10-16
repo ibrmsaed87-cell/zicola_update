@@ -23,9 +23,14 @@ object AdManager {
     private var chapterCount = 0
 
     // User gets 2 hours free of ads if they watch the rewarded video
+    private const val PREFS_NAME = "ad_reward_prefs"
+    private const val AD_FREE_UNTIL_KEY = "ad_free_until"
+    private lateinit var appContext: Context
     private var adFreeUntil = 0L
 
     fun init(context: Context) {
+        appContext = context.applicationContext
+        adFreeUntil = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getLong(AD_FREE_UNTIL_KEY, 0L)
         loadInterstitial(context)
         loadRewarded(context)
     }
@@ -36,6 +41,7 @@ object AdManager {
 
     fun disableAdsForHours(hours: Int) {
         adFreeUntil = System.currentTimeMillis() + (hours * 3600000L)
+        appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putLong(AD_FREE_UNTIL_KEY, adFreeUntil).apply()
     }
     
     fun getAdFreeRemainingTime(): Long {
