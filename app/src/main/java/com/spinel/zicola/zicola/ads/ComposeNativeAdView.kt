@@ -31,17 +31,23 @@ fun ComposeNativeAdView(modifier: Modifier = Modifier) {
 
     val context = LocalContext.current
     var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
-    var isFailed by remember { mutableStateOf(false) }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(context) {
+        var disposed = false
+        var ownedAd: NativeAd? = null
         val adLoader = AdLoader.Builder(context, "ca-app-pub-9118481973136364/8195344971")
             .forNativeAd { ad: NativeAd ->
-                nativeAd = ad
+                if (disposed) {
+                    ad.destroy()
+                } else {
+                    ownedAd?.destroy()
+                    ownedAd = ad
+                    nativeAd = ad
+                }
             }
             .withAdListener(object : AdListener() {
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     android.util.Log.e("NativeAd", "Failed to load: ${error.message}")
-                    isFailed = true
                 }
                 override fun onAdLoaded() {
                     android.util.Log.d("NativeAd", "Loaded successfully")
@@ -52,7 +58,10 @@ fun ComposeNativeAdView(modifier: Modifier = Modifier) {
         adLoader.loadAd(AdRequest.Builder().build())
 
         onDispose {
-            nativeAd?.destroy()
+            disposed = true
+            ownedAd?.destroy()
+            ownedAd = null
+            nativeAd = null
         }
     }
 
