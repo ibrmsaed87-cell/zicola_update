@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="native_ad_text">#172333</color>
+    <color name="native_ad_secondary_text">#394A5D</color>
+    <color name="native_ad_label_text">#FFFFFF</color>
+    <color name="native_ad_panel">#E6F0FA</color>
+    <color name="native_ad_border">#376B9D</color>
+    <color name="native_ad_label">#234F7B</color>
+</resources>
