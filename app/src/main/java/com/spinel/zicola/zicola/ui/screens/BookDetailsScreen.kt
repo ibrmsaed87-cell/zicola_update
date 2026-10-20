@@ -293,9 +293,6 @@ val book = bookWithProgress.book
                     }
                 )
             }
-            item {
-                BannerAdView(modifier = Modifier.padding(vertical = 16.dp))
-            }
         }
     }
 }
