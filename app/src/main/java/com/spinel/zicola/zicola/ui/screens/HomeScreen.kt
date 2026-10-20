@@ -94,15 +94,6 @@ fun HomeScreen(
                     }
                 }
             }
-            
-            item {
-                com.spinel.zicola.zicola.ads.ComposeNativeAdView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                )
-            }
-
             item {
                 Text(
                     text = "الجزء الثالث",
