@@ -317,10 +317,7 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
 
                                 Button(
                                     onClick = { 
-                                        com.spinel.zicola.zicola.ads.AdManager.showInterstitialAd(activity) {
-
-                                            viewModel.goToNextChapter()
-                                        }
+                                        viewModel.goToNextChapter()
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth(0.8f)
