@@ -316,8 +316,10 @@ val bookmarkedChapter by viewModel.bookmarkedChapter.collectAsStateWithLifecycle
                             if (currentBlockIndex < totalBlocks - 1) {
 
                                 Button(
-                                    onClick = { 
-                                        viewModel.goToNextChapter()
+                                    onClick = {
+                                        com.spinel.zicola.zicola.ads.AdManager.showInterstitialAd(activity) {
+                                            viewModel.goToNextChapter()
+                                        }
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth(0.8f)
