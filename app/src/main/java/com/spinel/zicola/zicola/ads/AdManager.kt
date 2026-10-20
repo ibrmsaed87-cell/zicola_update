@@ -19,8 +19,7 @@ object AdManager {
     private var mInterstitialAd: InterstitialAd? = null
     private var mRewardedAd: RewardedAd? = null
 
-    private var lastInterstitialTime = 0L
-    private var chapterCount = 0
+    
 
     // User gets 2 hours free of ads if they watch the rewarded video
     private const val PREFS_NAME = "ad_reward_prefs"
@@ -87,25 +86,17 @@ object AdManager {
             return
         }
 
-        chapterCount++
-        val currentTime = System.currentTimeMillis()
-        
-        // Show ad if 3 chapters passed OR 5 minutes have passed since last ad
-        val shouldShow = mInterstitialAd != null && 
-                (chapterCount >= 3 || (currentTime - lastInterstitialTime) > 5 * 60 * 1000)
-
-        if (shouldShow && mInterstitialAd != null) {
+        if (mInterstitialAd != null) {
             mInterstitialAd?.fullScreenContentCallback = object: FullScreenContentCallback() {
                 override fun onAdDismissedFullScreenContent() {
                     mInterstitialAd = null
-                    lastInterstitialTime = System.currentTimeMillis()
-                    chapterCount = 0
                     loadInterstitial(activity)
                     onAdDismissed()
                 }
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                     mInterstitialAd = null
+                    loadInterstitial(activity)
                     onAdDismissed()
                 }
             }
