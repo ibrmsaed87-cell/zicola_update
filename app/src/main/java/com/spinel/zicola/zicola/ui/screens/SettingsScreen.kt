@@ -162,20 +162,6 @@ fun SettingsScreen(
                             }
                         )
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        SettingsItem(
-                            title = "إزالة الإعلانات مؤقتاً (مكافأة 🎁)",
-                            onClick = {
-                                com.spinel.zicola.zicola.ads.AdManager.showRewardedAd(activity, 
-                                    onRewardEarned = {
-                                        Toast.makeText(context, "تم إزالة الإعلانات لمدة ساعتين بنجاح!", Toast.LENGTH_LONG).show()
-                                    },
-                                    onAdFailedOrDismissed = {
-                                        Toast.makeText(context, "لم يكتمل عرض الإعلان", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            }
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                         if (com.spinel.zicola.zicola.ads.ConsentManager.isPrivacyOptionsRequired()) {
                             SettingsItem(
                                 title = "خيارات الخصوصية",
