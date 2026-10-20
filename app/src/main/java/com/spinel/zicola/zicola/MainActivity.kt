@@ -101,7 +101,6 @@ class MainActivity : ComponentActivity() {
                         isMobileAdsInitializeCalled = true
                         com.google.android.gms.ads.MobileAds.initialize(this@MainActivity) {}
                         com.spinel.zicola.zicola.ads.AdManager.init(this@MainActivity)
-                        (application as ZicolaApplication).appOpenAdManager.loadAd()
                     }
                 }
             }
