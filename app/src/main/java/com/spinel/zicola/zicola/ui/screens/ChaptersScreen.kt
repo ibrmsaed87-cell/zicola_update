@@ -138,13 +138,6 @@ fun ChaptersScreen(
                             }
                         }
                     }
-                    
-                    if ((index + 1) % 7 == 0 && (index + 1) < book.totalBlocks) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        com.spinel.zicola.zicola.ads.ComposeNativeAdView(
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
                 }
             }
         }
